@@ -12,13 +12,20 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       WorkingPatternItem.belongsTo(models.WorkingPattern, {
         foreignKey: 'workingPatternId',
-        as: 'working_pattern',
+        as: 'workingPattern',
+        onDelete: 'cascade',
       });
     }
   }
   WorkingPatternItem.init(
     {
-      workingPatternId: DataTypes.INTEGER,
+      workingPatternId: {
+        type: DataTypes.INTEGER,
+        references: {
+          model: 'WorkingPatterns',
+          key: 'id',
+        },
+      },
       order: DataTypes.INTEGER,
       dayStatus: DataTypes.STRING,
       clockIn: DataTypes.TIME,

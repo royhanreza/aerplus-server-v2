@@ -29,6 +29,21 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       active: DataTypes.BOOLEAN,
+      effectiveDate: {
+        type: DataTypes.DATEONLY,
+      },
+      endDate: {
+        type: DataTypes.DATEONLY,
+      },
+      daysTo: {
+        type: DataTypes.SMALLINT,
+      },
+      workInHoliday: {
+        type: DataTypes.BOOLEAN,
+      },
+      workInMassLeave: {
+        type: DataTypes.BOOLEAN,
+      },
     },
     {
       sequelize,

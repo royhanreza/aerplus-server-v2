@@ -10,6 +10,22 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Career.belongsTo(models.Employee, {
+        foreignKey: 'employeeId',
+        as: 'employee',
+      });
+      Career.belongsTo(models.Designation, {
+        foreignKey: 'designationId',
+        as: 'designation',
+      });
+      Career.belongsTo(models.Department, {
+        foreignKey: 'departmentId',
+        as: 'department',
+      });
+      Career.belongsTo(models.JobTitle, {
+        foreignKey: 'jobTitleId',
+        as: 'jobTitle',
+      });
     }
   }
   Career.init(

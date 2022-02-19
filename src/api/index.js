@@ -8,6 +8,7 @@ const jobTitle = require('./routes/jobtitle');
 const career = require('./routes/career');
 const office = require('./routes/office');
 const workingPattern = require('./routes/workingpattern');
+const attendance = require('./routes/attendance');
 
 module.exports = () => {
   const app = Router();
@@ -21,5 +22,6 @@ module.exports = () => {
   career(app);
   office(app);
   workingPattern(app);
+  attendance(app);
   return app;
 };

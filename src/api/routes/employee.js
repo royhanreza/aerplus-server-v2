@@ -179,6 +179,80 @@ module.exports = (app) => {
   });
 
   /**
+   * Get specific attendances data by employee id with or without pagination
+   */
+  route.get('/:id/attendances', async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const pagination = req.query.pagination || false;
+      const orderBy = cleanQueryFilter(req.query.order_by, ['date'], 'date');
+      const orderIn = cleanQueryFilter(
+        req.query.order_in,
+        ['desc', 'asc'],
+        'desc',
+      );
+      const startDate = cleanQueryFilter(req.query.start_date, [], null);
+      const endDate = cleanQueryFilter(req.query.end_date, [], null);
+
+      const filter = {
+        orderBy,
+        orderIn,
+        startDate: startDate && new Date(startDate),
+        endDate: endDate && dayjs.utc(endDate).add(1, 'day').format(),
+      };
+
+      // return res.send(filter);
+
+      // * Get data without pagination
+      if (!pagination || pagination !== 'true') {
+        const { attendances } = await employeeServiceInstance.getAttendances(
+          Number(id),
+          filter,
+        );
+
+        return res.json({
+          data: attendances,
+        });
+      }
+
+      // * Get data with pagination
+
+      const { page } = req.query;
+      if (!page || Number.isNaN(page)) {
+        return res.status(400).send({
+          message: '"page" query is required & must be a number',
+        });
+      }
+
+      const perPage = req.query.per_page;
+      if (!perPage || Number.isNaN(perPage)) {
+        return res.status(400).send({
+          message: '"perPage" query is required & must be a number',
+        });
+      }
+
+      // eslint-disable-next-line operator-linebreak
+      const { attendances, total } =
+        await employeeServiceInstance.getPaginatedAttendances(
+          Number(id),
+          Number(page),
+          Number(perPage),
+          filter,
+        );
+
+      return res.json({
+        data: attendances,
+        page: Number(page),
+        total,
+      });
+    } catch (error) {
+      next(error);
+    }
+
+    return null;
+  });
+
+  /**
    * Get working patterns by employee
    */
   route.get('/:id/working-patterns', async (req, res, next) => {

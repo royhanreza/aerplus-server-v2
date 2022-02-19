@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
         as: 'inspections',
         onDelete: 'cascade',
       });
+      Employee.hasMany(models.Career, {
+        as: 'careers',
+        onDelete: 'cascade',
+      });
       Employee.hasOne(models.EmployeeTracker, {
         foreignKey: 'employeeId',
         as: 'tracker',

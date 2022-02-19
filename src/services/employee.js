@@ -17,6 +17,7 @@ const {
   EmployeeTracker,
   Inspection,
   WorkingPattern,
+  Attendance,
 } = models;
 class EmployeeService {
   static async getAll() {
@@ -117,6 +118,57 @@ class EmployeeService {
 
       return {
         inspections: rows,
+        total: count,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getAttendances(id, filter) {
+    try {
+      const attendances = await Attendance.findAll({
+        order: [[filter.orderBy, filter.orderIn]],
+        where: {
+          employeeId: id,
+          ...(filter.startDate &&
+            filter.endDate && {
+              date: {
+                [Op.between]: [filter.startDate, filter.endDate],
+              },
+            }),
+        },
+      });
+
+      return { attendances };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getPaginatedAttendances(id, page, perPage, filter) {
+    try {
+      const offset = (page - 1) * perPage;
+
+      const { rows, count } = await Attendance.findAndCountAll({
+        order: [[filter.orderBy, filter.orderIn]],
+        where: {
+          employeeId: id,
+          ...(filter.startDate &&
+            filter.endDate && {
+              date: {
+                [Op.between]: [filter.startDate, filter.endDate],
+              },
+            }),
+        },
+        limit: Number(perPage),
+        offset: Number(offset),
+        // include: 'employee',
+      });
+
+      return {
+        attendances: rows,
+        page,
         total: count,
       };
     } catch (error) {

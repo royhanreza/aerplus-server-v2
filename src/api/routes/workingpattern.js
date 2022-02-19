@@ -73,8 +73,8 @@ module.exports = (app) => {
             Joi.object().keys({
               order: Joi.number().required(),
               day_status: Joi.string().required(),
-              clock_in: Joi.string().required(),
-              clock_out: Joi.string().required(),
+              clock_in: Joi.string().allow('', null).required(),
+              clock_out: Joi.string().allow('', null).required(),
               delay_tolerance: Joi.number().default(0),
             }),
           ),

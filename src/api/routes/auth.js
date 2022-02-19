@@ -48,4 +48,38 @@ module.exports = (app) => {
       }
     },
   );
+
+  /**
+   * Auth: Mobile Sign In
+   */
+  route.post(
+    '/mobile/regular/signin',
+    celebrate({
+      body: Joi.object({
+        username: Joi.string().required(),
+        password: Joi.string().required(),
+      }).options(celebrateOptions),
+    }),
+    async (req, res, next) => {
+      Logger.debug('Calling Sign-In endpoint with body: %o', req.body);
+      try {
+        const { username, password } = req.body;
+        const { employee } = await AuthServiceInstance.mobileRegularSignIn(
+          username,
+          password,
+        );
+        return res
+          .json({
+            message: 'sign in successfully',
+            code: 200,
+            error: false,
+            data: employee,
+          })
+          .status(200);
+      } catch (e) {
+        Logger.error('🔥 error: %o', e);
+        return next(e);
+      }
+    },
+  );
 };

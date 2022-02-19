@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     // eslint-disable-next-line no-unused-vars
     static associate(models) {
       // define association here
+      Department.hasMany(models.Career, {
+        as: 'careers',
+        // onDelete: 'cascade',
+      });
     }
   }
   Department.init(
