@@ -72,7 +72,7 @@ Request Example
 
 URL
 
-    POST /api/hrd-auth/mobile/regular/signin
+    POST /api/hrd-auth/mobile/signin/admin
 
 Request Example
 
@@ -149,4 +149,17 @@ Response Example
                 }
             }
         }
+    }
+
+### Mobile Sign In (Admin)
+
+URL
+
+    POST /api/hrd-auth/mobile/signin/admin
+
+Request Example
+
+    {
+        "username": "eza",
+        "password": "123456789"
     }
