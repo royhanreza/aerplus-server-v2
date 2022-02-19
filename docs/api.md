@@ -18,9 +18,9 @@ URL (With Pagination)
 
     GET /api/employees/{id}/attendances?pagination=true&page=1&per_page=2&start_date=2022-02-01&end_date=2022-02-02
 
-# Attendances
+## Attendances
 
-## Checkin / Clockin
+### Checkin / Clockin
 
 URL
 
@@ -43,7 +43,7 @@ Request Example:
         attachment: File/Image
     }
 
-## Checkout / Clockout
+### Checkout / Clockout
 
 URL
 
