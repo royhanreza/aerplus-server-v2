@@ -31,6 +31,10 @@ module.exports = (sequelize, DataTypes) => {
         through: models.EmployeeWorkingPatterns,
         as: 'workingPatterns',
       });
+      Employee.belongsTo(models.Office, {
+        foreignKey: 'officeId',
+        as: 'office',
+      });
     }
   }
   Employee.init(

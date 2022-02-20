@@ -18,6 +18,7 @@ const {
   Inspection,
   WorkingPattern,
   Attendance,
+  Career,
 } = models;
 class EmployeeService {
   static async getAll() {
@@ -62,14 +63,33 @@ class EmployeeService {
         include: [
           'credential',
           'tracker',
+          'office',
           // {
           //   model: WorkingPattern,
           //   as: 'workingPatterns',
           //   through: { where: { active: true } },
           // },
+          {
+            model: Career,
+            as: 'careers',
+            include: ['designation', 'department', 'jobTitle'],
+          },
         ],
       });
-      return employee;
+
+      const newEmployee = employee.get();
+
+      const activeCareer = employee.careers.filter(
+        (career) => career.active,
+      )[0];
+
+      // if (activeCareer) {
+      // newEmployee.activeCareer = activeCareer;
+      // }
+      Object.assign(newEmployee, { career: activeCareer });
+      delete newEmployee.careers;
+
+      return newEmployee;
     } catch (error) {
       throw error.message || error;
     }

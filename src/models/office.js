@@ -9,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Office.hasMany(models.Employee, {
+        as: 'employees',
+      });
     }
   }
   Office.init(
