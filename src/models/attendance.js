@@ -15,6 +15,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'sickApplication',
         onDelete: 'cascade',
       });
+      Attendance.belongsTo(models.Employee, {
+        foreignKey: 'employeeId',
+        as: 'employee',
+        onDelete: 'cascade',
+      });
     }
   }
   Attendance.init(

@@ -13,6 +13,8 @@ const permissionCategory = require('./routes/permissioncategory');
 const sickApplication = require('./routes/sickapplication');
 const permissionApplication = require('./routes/permissionapplication');
 const eventCalendar = require('./routes/eventcalendar');
+const dailySalary = require('./routes/dailysalary');
+const outlet = require('./routes/outlet');
 
 module.exports = () => {
   const app = Router();
@@ -31,5 +33,7 @@ module.exports = () => {
   sickApplication(app);
   permissionApplication(app);
   eventCalendar(app);
+  dailySalary(app);
+  outlet(app);
   return app;
 };

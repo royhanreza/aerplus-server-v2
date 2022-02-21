@@ -18,11 +18,16 @@ module.exports = (sequelize, DataTypes) => {
         as: 'attendances',
         onDelete: 'cascade',
       });
+      PermissionApplication.belongsTo(models.PermissionCategory, {
+        as: 'category',
+        onDelete: 'cascade',
+      });
     }
   }
   PermissionApplication.init(
     {
       employeeId: DataTypes.INTEGER,
+      permissionCategoryId: DataTypes.INTEGER,
       date: DataTypes.DATEONLY,
       permissionDates: DataTypes.STRING,
       note: DataTypes.STRING,

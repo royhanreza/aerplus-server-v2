@@ -17,6 +17,14 @@ module.exports = (sequelize, DataTypes) => {
         as: 'careers',
         onDelete: 'cascade',
       });
+      Employee.hasMany(models.Attendance, {
+        as: 'attendances',
+        onDelete: 'cascade',
+      });
+      Employee.hasMany(models.SickApprovalFlow, {
+        as: 'sickApprovalFlows',
+        onDelete: 'cascade',
+      });
       Employee.hasOne(models.EmployeeTracker, {
         foreignKey: 'employeeId',
         as: 'tracker',
@@ -56,6 +64,7 @@ module.exports = (sequelize, DataTypes) => {
       postalCode: DataTypes.STRING,
       residentialAddress: DataTypes.STRING,
       photo: DataTypes.STRING,
+      officeId: DataTypes.INTEGER,
     },
     {
       sequelize,

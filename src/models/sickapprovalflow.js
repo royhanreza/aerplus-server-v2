@@ -15,6 +15,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'sickApplication',
         onDelete: 'cascade',
       });
+      SickApprovalFlow.belongsTo(models.Employee, {
+        foreignKey: 'confirmedBy',
+        as: 'confirmer',
+        onDelete: 'cascade',
+      });
     }
   }
   SickApprovalFlow.init(

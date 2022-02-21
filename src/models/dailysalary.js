@@ -2,7 +2,7 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class PermissionCategory extends Model {
+  class DailySalary extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -10,22 +10,23 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      PermissionCategory.hasMany(models.PermissionApplication, {
-        as: 'permissionApplications',
-        onDelete: 'cascade',
-      });
     }
   }
-  PermissionCategory.init(
+  DailySalary.init(
     {
-      name: DataTypes.STRING,
-      maxDay: DataTypes.SMALLINT,
-      active: DataTypes.BOOLEAN,
+      title: DataTypes.STRING,
+      employeeId: DataTypes.INTEGER,
+      startDatePeriod: DataTypes.DATEONLY,
+      endDatePeriod: DataTypes.DATEONLY,
+      incomes: DataTypes.TEXT,
+      deductions: DataTypes.TEXT,
+      note: DataTypes.STRING,
+      noteBy: DataTypes.INTEGER,
     },
     {
       sequelize,
-      modelName: 'PermissionCategory',
+      modelName: 'DailySalary',
     },
   );
-  return PermissionCategory;
+  return DailySalary;
 };

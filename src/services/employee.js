@@ -19,6 +19,8 @@ const {
   WorkingPattern,
   Attendance,
   Career,
+  SickApplication,
+  SickApprovalFlow,
 } = models;
 class EmployeeService {
   static async getAll() {
@@ -188,6 +190,67 @@ class EmployeeService {
 
       return {
         attendances: rows,
+        page,
+        total: count,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getSickApplications(id, filter) {
+    try {
+      const sickApplications = await SickApplication.findAll({
+        include: [
+          {
+            model: SickApprovalFlow,
+            as: 'approvalFlows',
+            include: ['confirmedBy'],
+          },
+        ],
+        order: [[filter.orderBy, filter.orderIn]],
+        where: {
+          employeeId: id,
+          ...(filter.status && { approvalStatus: filter.status }),
+          ...(filter.startDate &&
+            filter.endDate && {
+              date: {
+                [Op.between]: [filter.startDate, filter.endDate],
+              },
+            }),
+        },
+      });
+
+      return { sickApplications };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getPaginatedSickApplications(id, page, perPage, filter) {
+    try {
+      const offset = (page - 1) * perPage;
+
+      const { rows, count } = await SickApplication.findAndCountAll({
+        include: ['approvalFlows'],
+        order: [[filter.orderBy, filter.orderIn]],
+        where: {
+          employeeId: id,
+          ...(filter.status && { approvalStatus: filter.status }),
+          ...(filter.startDate &&
+            filter.endDate && {
+              date: {
+                [Op.between]: [filter.startDate, filter.endDate],
+              },
+            }),
+        },
+        limit: Number(perPage),
+        offset: Number(offset),
+        // include: 'employee',
+      });
+
+      return {
+        sickApplications: rows,
         page,
         total: count,
       };
