@@ -10,6 +10,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Attendance.belongsTo(models.SickApplication, {
+        foreignKey: 'sickApplicationId',
+        as: 'sickApplication',
+        onDelete: 'cascade',
+      });
     }
   }
   Attendance.init(

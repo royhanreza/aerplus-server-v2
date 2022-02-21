@@ -9,6 +9,10 @@ const career = require('./routes/career');
 const office = require('./routes/office');
 const workingPattern = require('./routes/workingpattern');
 const attendance = require('./routes/attendance');
+const permissionCategory = require('./routes/permissioncategory');
+const sickApplication = require('./routes/sickapplication');
+const permissionApplication = require('./routes/permissionapplication');
+const eventCalendar = require('./routes/eventcalendar');
 
 module.exports = () => {
   const app = Router();
@@ -23,5 +27,9 @@ module.exports = () => {
   office(app);
   workingPattern(app);
   attendance(app);
+  permissionCategory(app);
+  sickApplication(app);
+  permissionApplication(app);
+  eventCalendar(app);
   return app;
 };
