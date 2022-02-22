@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       PermissionCategory.hasMany(models.PermissionApplication, {
         as: 'permissionApplications',
+        foreignKey: 'permissionCategoryId',
         onDelete: 'cascade',
       });
     }

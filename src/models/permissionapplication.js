@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       PermissionApplication.belongsTo(models.PermissionCategory, {
         as: 'category',
+        foreignKey: 'permissionCategoryId',
         onDelete: 'cascade',
       });
     }

@@ -23,6 +23,12 @@ module.exports = (sequelize, DataTypes) => {
       });
       Employee.hasMany(models.SickApprovalFlow, {
         as: 'sickApprovalFlows',
+        foreignKey: 'confirmedBy',
+        onDelete: 'cascade',
+      });
+      Employee.hasMany(models.PermissionApprovalFlow, {
+        as: 'permissionApprovalFlows',
+        foreignKey: 'confirmedBy',
         onDelete: 'cascade',
       });
       Employee.hasOne(models.EmployeeTracker, {

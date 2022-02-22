@@ -13,7 +13,9 @@ const { SickApplication, SickApprovalFlow, Attendance } = models;
 class SickApplicationService {
   static async getAll() {
     try {
-      const sickApplications = await SickApplication.findAll();
+      const sickApplications = await SickApplication.findAll({
+        include: ['approvalFlows'],
+      });
       return { sickApplications };
     } catch (error) {
       throw error;
@@ -22,7 +24,9 @@ class SickApplicationService {
 
   static async getById(id) {
     try {
-      const sickApplication = await SickApplication.findByPk(id);
+      const sickApplication = await SickApplication.findByPk(id, {
+        include: ['approvalFlows'],
+      });
       return sickApplication;
     } catch (error) {
       throw error;
