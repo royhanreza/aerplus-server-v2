@@ -276,6 +276,7 @@ class EmployeeService {
             as: 'approvalFlows',
             include: ['confirmedBy'],
           },
+          'category',
         ],
         order: [[filter.orderBy, filter.orderIn]],
         where: {
@@ -307,6 +308,7 @@ class EmployeeService {
             as: 'approvalFlows',
             include: ['confirmedBy'],
           },
+          'category',
         ],
         order: [[filter.orderBy, filter.orderIn]],
         where: {

@@ -19,7 +19,7 @@ class PermissionApplicationService {
   static async getAll() {
     try {
       const permissionApplications = await PermissionApplication.findAll({
-        include: ['approvalFlows'],
+        include: ['approvalFlows', 'category'],
       });
       return { permissionApplications };
     } catch (error) {
@@ -30,7 +30,7 @@ class PermissionApplicationService {
   static async getById(id) {
     try {
       const permissionApplication = await PermissionApplication.findByPk(id, {
-        include: ['approvalFlows'],
+        include: ['approvalFlows', 'category'],
       });
       return permissionApplication;
     } catch (error) {
