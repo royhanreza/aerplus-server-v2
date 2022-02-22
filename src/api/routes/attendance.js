@@ -110,11 +110,13 @@ module.exports = (app) => {
       [Segments.BODY]: Joi.object()
         .options(celebrateOptions)
         .keys({
-          name: Joi.string().required(),
-          phone: Joi.string().allow('', null),
-          address: Joi.string().required(),
-          latitude: Joi.string().required(),
-          longitude: Joi.string().required(),
+          employee_id: Joi.number().required(),
+          date: Joi.string().required(),
+          clock_in: Joi.string().required(),
+          clock_out: Joi.string().required(),
+          status: Joi.string().required(),
+          time_late: Joi.number().allow(null, ''),
+          overtime: Joi.number().allow(null, ''),
         }),
     }),
     // TODO: FIX MULTER AND JOI CONFIGURATION
@@ -147,11 +149,13 @@ module.exports = (app) => {
       [Segments.BODY]: Joi.object()
         .options(celebrateOptions)
         .keys({
-          name: Joi.string().required(),
-          phone: Joi.string().allow('', null),
-          address: Joi.string().required(),
-          latitude: Joi.string().required(),
-          longitude: Joi.string().required(),
+          employee_id: Joi.number().required(),
+          date: Joi.string().required(),
+          clock_in: Joi.string().required(),
+          clock_out: Joi.string().required(),
+          status: Joi.string().required(),
+          time_late: Joi.number().allow(null, ''),
+          overtime: Joi.number().allow(null, ''),
         }),
     }),
     // TODO: FIX MULTER AND JOI CONFIGURATION

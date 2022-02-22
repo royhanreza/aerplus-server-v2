@@ -15,6 +15,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'permissionApplication',
         onDelete: 'cascade',
       });
+      PermissionApprovalFlow.belongsTo(models.Employee, {
+        foreignKey: 'confirmedBy',
+        as: 'confirmer',
+        onDelete: 'cascade',
+      });
     }
   }
   PermissionApprovalFlow.init(

@@ -167,6 +167,32 @@ class AttendanceService {
       office_longitude,
     } = attendanceInputDTO;
 
+    const payload = {
+      employeeId: employee_id,
+      date,
+      clockIn: clock_in,
+      clockInAt: clock_in_at,
+      clockInIpAddress: clock_in_ip_address,
+      clockInDeviceDetail: clock_in_device_detail,
+      clockInLatitude: clock_in_latitude,
+      clockInLongitude: clock_in_longitude,
+      clockOut: clock_out,
+      clockOutAt: clock_out_at,
+      clockOutIpAddress: clock_out_ip_address,
+      clcokOutDeviceDetail: clock_out_device_detail,
+      clockOutLatitude: clock_out_latitude,
+      clockOutLongitude: clock_out_longitude,
+      status,
+      timeLate: time_late,
+      earlyLeaving: early_leaving,
+      overtime,
+      approvalStatus: approval_status,
+      note,
+      attachment,
+      officeLatitude: office_latitude,
+      officeLongitude: office_longitude,
+    };
+
     try {
       await Attendance.update(
         {
