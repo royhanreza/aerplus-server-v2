@@ -5,16 +5,56 @@ const dayjs = require('dayjs');
 const { Op } = require('sequelize');
 const config = require('../config');
 const workingPatternHelper = require('../helpers/workingpattern');
+const { getActiveCareer } = require('../helpers/career');
 const s3 = require('../loaders/awsS3');
 const models = require('../models');
 
-const { Attendance, Employee, WorkingPattern } = models;
+const { Attendance, Employee, WorkingPattern, Career } = models;
 
 class AttendanceService {
   static async getAll() {
     try {
       const attendances = await Attendance.findAll();
       return { attendances };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getAllWithEmployees(filter) {
+    try {
+      const attendances = await Employee.findAll({
+        // where: {
+        //   active: 1,
+        // },
+        include: [
+          {
+            model: Attendance,
+            as: 'attendances',
+            order: [['createdAt', 'DESC']],
+            where: {
+              ...(filter.date && { date: filter.date }),
+            },
+            required: false,
+            // required: true,
+          },
+          {
+            model: Career,
+            as: 'careers',
+            include: ['designation', 'department', 'jobTitle'],
+            required: false,
+          },
+        ],
+      });
+
+      const newAttendances = attendances.map((employee) => {
+        const newEmployee = employee.get();
+        const career = getActiveCareer(newEmployee.careers);
+        newEmployee.career = career;
+        delete newEmployee.careers;
+        return newEmployee;
+      });
+      return { attendances: newAttendances };
     } catch (error) {
       throw error;
     }

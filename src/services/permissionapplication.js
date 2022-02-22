@@ -18,7 +18,9 @@ const {
 class PermissionApplicationService {
   static async getAll() {
     try {
-      const permissionApplications = await PermissionApplication.findAll();
+      const permissionApplications = await PermissionApplication.findAll({
+        include: ['approvalFlows'],
+      });
       return { permissionApplications };
     } catch (error) {
       throw error;
@@ -27,7 +29,9 @@ class PermissionApplicationService {
 
   static async getById(id) {
     try {
-      const permissionApplication = await PermissionApplication.findByPk(id);
+      const permissionApplication = await PermissionApplication.findByPk(id, {
+        include: ['approvalFlows'],
+      });
       return permissionApplication;
     } catch (error) {
       throw error;

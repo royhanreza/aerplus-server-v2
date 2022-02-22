@@ -5,6 +5,7 @@ const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 const multer = require('multer');
 const AttendanceService = require('../../services/attendance');
+const { cleanQueryFilter } = require('../../helpers');
 
 dayjs.extend(utc);
 
@@ -66,6 +67,33 @@ module.exports = (app) => {
       return res.json({
         data: attendance,
       });
+    } catch (error) {
+      next(error);
+    }
+
+    return null;
+  });
+
+  /**
+   * Get all with employees
+   */
+  route.get('/resources/all-with-employees', async (req, res, next) => {
+    try {
+      // return res.json({ id: 1 });
+      const date = cleanQueryFilter(req.query.date, [], null);
+
+      const filter = {
+        date,
+      };
+
+      const { attendances } =
+        await AttendanceServiceInstance.getAllWithEmployees(filter);
+
+      return res.json({
+        message: 'OK',
+        data: attendances,
+      });
+      // * Get data with pagination
     } catch (error) {
       next(error);
     }

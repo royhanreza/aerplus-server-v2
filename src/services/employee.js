@@ -21,6 +21,8 @@ const {
   Career,
   SickApplication,
   SickApprovalFlow,
+  PermissionApplication,
+  PermissionApprovalFlow,
 } = models;
 class EmployeeService {
   static async getAll() {
@@ -232,7 +234,13 @@ class EmployeeService {
       const offset = (page - 1) * perPage;
 
       const { rows, count } = await SickApplication.findAndCountAll({
-        include: ['approvalFlows'],
+        include: [
+          {
+            model: SickApprovalFlow,
+            as: 'approvalFlows',
+            include: ['confirmedBy'],
+          },
+        ],
         order: [[filter.orderBy, filter.orderIn]],
         where: {
           employeeId: id,
@@ -251,6 +259,73 @@ class EmployeeService {
 
       return {
         sickApplications: rows,
+        page,
+        total: count,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getPermissionApplications(id, filter) {
+    try {
+      const permissionApplications = await PermissionApplication.findAll({
+        include: [
+          {
+            model: PermissionApprovalFlow,
+            as: 'approvalFlows',
+            include: ['confirmedBy'],
+          },
+        ],
+        order: [[filter.orderBy, filter.orderIn]],
+        where: {
+          employeeId: id,
+          ...(filter.status && { approvalStatus: filter.status }),
+          ...(filter.startDate &&
+            filter.endDate && {
+              date: {
+                [Op.between]: [filter.startDate, filter.endDate],
+              },
+            }),
+        },
+      });
+
+      return { permissionApplications };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getPaginatedPermissionApplications(id, page, perPage, filter) {
+    try {
+      const offset = (page - 1) * perPage;
+
+      const { rows, count } = await PermissionApplication.findAndCountAll({
+        include: [
+          {
+            model: PermissionApprovalFlow,
+            as: 'approvalFlows',
+            include: ['confirmedBy'],
+          },
+        ],
+        order: [[filter.orderBy, filter.orderIn]],
+        where: {
+          employeeId: id,
+          ...(filter.status && { approvalStatus: filter.status }),
+          ...(filter.startDate &&
+            filter.endDate && {
+              date: {
+                [Op.between]: [filter.startDate, filter.endDate],
+              },
+            }),
+        },
+        limit: Number(perPage),
+        offset: Number(offset),
+        // include: 'employee',
+      });
+
+      return {
+        permissionApplications: rows,
         page,
         total: count,
       };

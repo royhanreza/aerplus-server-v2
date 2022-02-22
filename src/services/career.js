@@ -48,6 +48,7 @@ class CareerService {
         {
           where: {
             active: 1,
+            employeeId: employee_id,
           },
           transaction: t,
         },
