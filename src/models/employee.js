@@ -31,6 +31,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'confirmedBy',
         onDelete: 'cascade',
       });
+      Employee.hasMany(models.LeaveApprovalFlow, {
+        as: 'leaveApprovalFlows',
+        foreignKey: 'confirmedBy',
+        onDelete: 'cascade',
+      });
       Employee.hasOne(models.EmployeeTracker, {
         foreignKey: 'employeeId',
         as: 'tracker',
@@ -39,6 +44,11 @@ module.exports = (sequelize, DataTypes) => {
       Employee.hasOne(models.EmployeeCredential, {
         foreignKey: 'employeeId',
         as: 'credential',
+        onDelete: 'cascade',
+      });
+      Employee.hasOne(models.Leave, {
+        foreignKey: 'employeeId',
+        as: 'leave',
         onDelete: 'cascade',
       });
       Employee.belongsToMany(models.WorkingPattern, {

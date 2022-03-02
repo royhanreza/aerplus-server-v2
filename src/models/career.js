@@ -14,17 +14,25 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'employeeId',
         as: 'employee',
       });
-      Career.belongsTo(models.Designation, {
-        foreignKey: 'designationId',
-        as: 'designation',
-      });
-      Career.belongsTo(models.Department, {
-        foreignKey: 'departmentId',
-        as: 'department',
+      // Career.belongsTo(models.Designation, {
+      //   foreignKey: 'designationId',
+      //   as: 'designation',
+      // });
+      // Career.belongsTo(models.Department, {
+      //   foreignKey: 'departmentId',
+      //   as: 'department',
+      // });
+      Career.belongsTo(models.Organization, {
+        foreignKey: 'organizationId',
+        as: 'organization',
       });
       Career.belongsTo(models.JobTitle, {
         foreignKey: 'jobTitleId',
         as: 'jobTitle',
+      });
+      Career.belongsTo(models.JobLevel, {
+        foreignKey: 'jobLevelId',
+        as: 'jobLevel',
       });
     }
   }
@@ -33,9 +41,11 @@ module.exports = (sequelize, DataTypes) => {
       employeeId: DataTypes.INTEGER,
       employmentStatus: DataTypes.STRING,
       type: DataTypes.STRING,
-      designationId: DataTypes.INTEGER,
-      departmentId: DataTypes.INTEGER,
+      // designationId: DataTypes.INTEGER,
+      // departmentId: DataTypes.INTEGER,
+      organizationId: DataTypes.INTEGER,
       jobTitleId: DataTypes.INTEGER,
+      jobLevelId: DataTypes.INTEGER,
       effectiveDate: DataTypes.DATEONLY,
       endOfEmploymentDate: DataTypes.DATEONLY,
       taxMethod: DataTypes.STRING,

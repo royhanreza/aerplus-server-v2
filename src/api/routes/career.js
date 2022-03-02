@@ -74,9 +74,11 @@ module.exports = (app) => {
           employee_id: Joi.number().required(),
           employment_status: Joi.string().required(),
           type: Joi.string().required(),
-          designation_id: Joi.number(),
-          department_id: Joi.number(),
+          // designation_id: Joi.number(),
+          // department_id: Joi.number(),
+          organization_id: Joi.number(),
           job_title_id: Joi.number(),
+          job_level_id: Joi.number(),
           effective_date: Joi.string().required(),
           end_of_employment_date: Joi.string().allow('', null),
           tax_method: Joi.string().allow('', null),
@@ -110,10 +112,22 @@ module.exports = (app) => {
   route.post(
     '/:id',
     celebrate({
-      [Segments.BODY]: Joi.object().options(celebrateOptions).keys({
-        name: Joi.string().required(),
-        active: Joi.number(),
-      }),
+      [Segments.BODY]: Joi.object()
+        .options(celebrateOptions)
+        .keys({
+          employee_id: Joi.number().required(),
+          employment_status: Joi.string().required(),
+          type: Joi.string().required(),
+          // designation_id: Joi.number(),
+          // department_id: Joi.number(),
+          organization_id: Joi.number(),
+          job_title_id: Joi.number(),
+          job_level_id: Joi.number(),
+          effective_date: Joi.string().required(),
+          end_of_employment_date: Joi.string().allow('', null),
+          tax_method: Joi.string().allow('', null),
+          active: Joi.number(),
+        }),
     }),
     // TODO: FIX MULTER AND JOI CONFIGURATION
     async (req, res, next) => {

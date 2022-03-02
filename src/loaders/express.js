@@ -83,7 +83,7 @@ module.exports = async ({ app }) => {
     // Logger.info('pass last error');
     res.status(err.status || 500);
     res.json({
-      message: err?.message,
+      message: err?.message || err,
       error: true,
       code: err.status || 500,
       errors: err,

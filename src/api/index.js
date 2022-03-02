@@ -4,7 +4,9 @@ const inspection = require('./routes/inspection');
 const auth = require('./routes/auth');
 const designation = require('./routes/designation');
 const department = require('./routes/department');
+const organization = require('./routes/organization');
 const jobTitle = require('./routes/jobtitle');
+const jobLevel = require('./routes/joblevel');
 const career = require('./routes/career');
 const office = require('./routes/office');
 const workingPattern = require('./routes/workingpattern');
@@ -12,9 +14,11 @@ const attendance = require('./routes/attendance');
 const permissionCategory = require('./routes/permissioncategory');
 const sickApplication = require('./routes/sickapplication');
 const permissionApplication = require('./routes/permissionapplication');
+const leaveApplication = require('./routes/leaveapplication');
 const eventCalendar = require('./routes/eventcalendar');
 const dailySalary = require('./routes/dailysalary');
 const outlet = require('./routes/outlet');
+const organizationalStructures = require('./routes/organizationalstructures');
 
 module.exports = () => {
   const app = Router();
@@ -24,7 +28,9 @@ module.exports = () => {
   inspection(app);
   designation(app);
   department(app);
+  organization(app);
   jobTitle(app);
+  jobLevel(app);
   career(app);
   office(app);
   workingPattern(app);
@@ -32,8 +38,10 @@ module.exports = () => {
   permissionCategory(app);
   sickApplication(app);
   permissionApplication(app);
+  leaveApplication(app);
   eventCalendar(app);
   dailySalary(app);
   outlet(app);
+  organizationalStructures(app);
   return app;
 };

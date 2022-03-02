@@ -4,11 +4,18 @@
 const { Op } = require('sequelize');
 const bcryptjs = require('bcryptjs');
 const sharp = require('sharp');
+const dayjs = require('dayjs');
+const localizedFormat = require('dayjs/plugin/localizedFormat');
+require('dayjs/locale/id');
+const { orderBy } = require('lodash');
 const models = require('../models');
 const subscriber = require('../subscribers/employee');
 const sequelize = require('../loaders/sequelize');
 const config = require('../config');
 const s3 = require('../loaders/awsS3');
+const { getDatesRange } = require('../helpers');
+
+dayjs.extend(localizedFormat);
 
 // eslint-disable-next-line object-curly-newline
 const {
@@ -23,6 +30,7 @@ const {
   SickApprovalFlow,
   PermissionApplication,
   PermissionApprovalFlow,
+  Leave,
 } = models;
 class EmployeeService {
   static async getAll() {
@@ -76,7 +84,7 @@ class EmployeeService {
           {
             model: Career,
             as: 'careers',
-            include: ['designation', 'department', 'jobTitle'],
+            include: ['organization', 'jobTitle', 'jobLevel'],
           },
         ],
       });
@@ -207,7 +215,7 @@ class EmployeeService {
           {
             model: SickApprovalFlow,
             as: 'approvalFlows',
-            include: ['confirmedBy'],
+            include: ['confirmer'],
           },
         ],
         order: [[filter.orderBy, filter.orderIn]],
@@ -229,6 +237,54 @@ class EmployeeService {
     }
   }
 
+  static async getRangeAttendances(id, filter) {
+    try {
+      if (!filter.startDate || !filter.endDate) {
+        throw new Error('Start date and end date are required');
+      }
+
+      const datesRange = getDatesRange(filter.startDate, filter.endDate);
+
+      const attendances = await Attendance.findAll({
+        where: {
+          employeeId: id,
+          ...(filter.startDate &&
+            filter.endDate && {
+              date: {
+                [Op.between]: [filter.startDate, filter.endDate],
+              },
+            }),
+        },
+      });
+
+      const rangeAttendances = datesRange.flatMap((currentDate) => {
+        const currentDateAttendances = attendances.filter(
+          (attendance) => attendance.date === currentDate,
+        );
+
+        const sortedCurrentDateAttendanes = orderBy(
+          currentDateAttendances,
+          ['id'],
+          ['desc'],
+        );
+
+        const newestAttendance = sortedCurrentDateAttendanes
+          ? sortedCurrentDateAttendanes[0]
+          : null;
+
+        return {
+          date: dayjs(currentDate).locale('id').format('ll'),
+          newest: newestAttendance,
+          attendances: sortedCurrentDateAttendanes,
+        };
+      });
+
+      return { attendances: rangeAttendances };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static async getPaginatedSickApplications(id, page, perPage, filter) {
     try {
       const offset = (page - 1) * perPage;
@@ -238,7 +294,7 @@ class EmployeeService {
           {
             model: SickApprovalFlow,
             as: 'approvalFlows',
-            include: ['confirmedBy'],
+            include: ['confirmer'],
           },
         ],
         order: [[filter.orderBy, filter.orderIn]],
@@ -274,7 +330,7 @@ class EmployeeService {
           {
             model: PermissionApprovalFlow,
             as: 'approvalFlows',
-            include: ['confirmedBy'],
+            include: ['confirmer'],
           },
           'category',
         ],
@@ -306,7 +362,7 @@ class EmployeeService {
           {
             model: PermissionApprovalFlow,
             as: 'approvalFlows',
-            include: ['confirmedBy'],
+            include: ['confirmer'],
           },
           'category',
         ],
@@ -386,6 +442,33 @@ class EmployeeService {
       }
 
       return activeWorkingPattern;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getActiveLeave(id) {
+    try {
+      const startDate = dayjs().startOf('year').format('YYYY-MM-DD').toString();
+      const endDate = dayjs().endOf('year').format('YYYY-MM-DD').toString();
+
+      // eslint-disable-next-line no-unused-vars
+      const [leave, created] = await Leave.findOrCreate({
+        where: { employeeId: id, active: 1 },
+        defaults: {
+          employeeId: id,
+          startDate,
+          endDate,
+          totalLeave: 12,
+          takenLeave: 0,
+        },
+      });
+
+      // if (created) {
+      //   return created;
+      // }
+
+      return leave;
     } catch (error) {
       throw error;
     }

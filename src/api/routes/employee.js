@@ -253,6 +253,46 @@ module.exports = (app) => {
   });
 
   /**
+   * Get specific attendances data by employee id with or without pagination
+   */
+  route.get('/:id/range-attendances', async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const orderBy = cleanQueryFilter(req.query.order_by, ['date'], 'date');
+      const orderIn = cleanQueryFilter(
+        req.query.order_in,
+        ['desc', 'asc'],
+        'desc',
+      );
+      const startDate = cleanQueryFilter(req.query.start_date, [], null);
+      const endDate = cleanQueryFilter(req.query.end_date, [], null);
+
+      const filter = {
+        orderBy,
+        orderIn,
+        startDate: startDate && new Date(startDate),
+        endDate: endDate && new Date(endDate),
+      };
+
+      // return res.send(filter);
+
+      // * Get data without pagination
+      const { attendances } = await employeeServiceInstance.getRangeAttendances(
+        Number(id),
+        filter,
+      );
+
+      return res.json({
+        data: attendances,
+      });
+    } catch (error) {
+      next(error);
+    }
+
+    return null;
+  });
+
+  /**
    * Get specific dick application data by employee id with or without pagination
    */
   route.get('/:id/sick-applications', async (req, res, next) => {
@@ -443,6 +483,27 @@ module.exports = (app) => {
 
       return res.json({
         data: activeWorkingPattern,
+      });
+    } catch (error) {
+      next(error);
+    }
+
+    return null;
+  });
+
+  /**
+   * Get leave by employee
+   */
+  route.get('/:id/active-leave', async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      // eslint-disable-next-line operator-linebreak
+      const activeLeave = await employeeServiceInstance.getActiveLeave(
+        Number(id),
+      );
+
+      return res.json({
+        data: activeLeave,
       });
     } catch (error) {
       next(error);

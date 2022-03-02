@@ -132,6 +132,7 @@ class DailySalaryService {
                 [Op.between]: [startDate, endDate],
               },
             },
+            required: false,
           },
         ],
         order: [
@@ -151,9 +152,14 @@ class DailySalaryService {
           //   presentAttendances = attendances.filter(
           //     (attendance) => attendance.status === 'hadir_hari_kerja',
           //   );
+          let summaryIncomesAmount = 0;
+          let summaryDeductionAmount = 0;
+          let summaryAmount = 0;
           const payments = datesRange.map((date) => {
             let dailyPay = 0;
             let overtimePay = 0;
+            let incomes_amount = 0;
+            const deductions_amount = 0;
 
             const [newAttendance] = attendances.filter(
               (attendance) => attendance.date === date,
@@ -164,9 +170,11 @@ class DailySalaryService {
                 date,
                 detail: {
                   incomes: [],
+                  incomes_amount,
                   deductions: [],
+                  deductions_amount,
                   amount: dailyPay,
-                  status: 'tidak_hadir',
+                  status: null,
                   attendance: null,
                 },
               };
@@ -181,22 +189,35 @@ class DailySalaryService {
               }
             }
 
-            const payAmount = dailyPay + overtimePay;
+            const incomes = [
+              {
+                name: 'Uang Harian',
+                value: dailyPay,
+              },
+              {
+                name: 'Upah Lembur',
+                value: overtimePay,
+              },
+            ];
+
+            incomes_amount = dailyPay + overtimePay;
+
+            const deductions = [];
+
+            const payAmount = incomes_amount - deductions_amount;
+
+            // Summary Amount Assignment
+            summaryIncomesAmount += incomes_amount;
+            summaryDeductionAmount += deductions_amount;
+            summaryAmount += payAmount;
 
             return {
               date,
               detail: {
-                incomes: [
-                  {
-                    name: 'Uang Harian',
-                    value: dailyPay,
-                  },
-                  {
-                    name: 'Upah Lembur',
-                    value: overtimePay,
-                  },
-                ],
-                deductions: [],
+                incomes,
+                incomes_amount,
+                deductions_amount,
+                deductions,
                 amount: payAmount,
                 status: newAttendance.status,
                 attendance: newAttendance,
@@ -210,6 +231,11 @@ class DailySalaryService {
           return {
             employee: newEmployee,
             payments,
+            summary: {
+              incomes_amount: summaryIncomesAmount,
+              deductions_amount: summaryDeductionAmount,
+              amount: summaryAmount,
+            },
           };
         }
 

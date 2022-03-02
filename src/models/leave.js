@@ -1,33 +1,34 @@
-/* eslint-disable strict */
-
-// 'use strict';
-
+'use strict';
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class Department extends Model {
+  class Leave extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    // eslint-disable-next-line no-unused-vars
     static associate(models) {
       // define association here
-      // Department.hasMany(models.Career, {
-      //   as: 'careers',
-      // });
+      Leave.belongsTo(models.Employee, {
+        foreignKey: 'employeeId',
+        as: 'employee',
+      });
     }
   }
-  Department.init(
+  Leave.init(
     {
-      name: DataTypes.STRING,
+      employeeId: DataTypes.INTEGER,
+      startDate: DataTypes.DATEONLY,
+      endDate: DataTypes.DATEONLY,
+      totalLeave: DataTypes.TINYINT,
+      takenLeave: DataTypes.TINYINT,
       active: DataTypes.BOOLEAN,
     },
     {
       sequelize,
-      modelName: 'Department',
+      modelName: 'Leave',
     },
   );
-  return Department;
+  return Leave;
 };

@@ -31,9 +31,11 @@ class CareerService {
       employee_id,
       employment_status,
       type,
-      designation_id,
-      department_id,
+      // designation_id,
+      // department_id,
+      organization_id,
       job_title_id,
+      job_level_id,
       effective_date,
       end_of_employment_date,
       tax_method,
@@ -59,9 +61,11 @@ class CareerService {
           employeeId: employee_id,
           employmentStatus: employment_status,
           type,
-          designationId: designation_id,
-          departmentId: department_id,
+          // designationId: designation_id,
+          // departmentId: department_id,
+          organizationId: organization_id,
           jobTitleId: job_title_id,
+          jobLevelId: job_level_id,
           effectiveDate: effective_date,
           endOfEmploymentDate: end_of_employment_date,
           taxMethod: tax_method,
@@ -85,31 +89,36 @@ class CareerService {
       employee_id,
       employment_status,
       type,
-      designation_id,
-      department_id,
+      // designation_id,
+      // department_id,
+      organization_id,
       job_title_id,
+      job_level_id,
       effective_date,
       end_of_employment_date,
       tax_method,
+      active,
     } = careerInputDTO;
 
+    const data = {
+      employeeId: employee_id,
+      employmentStatus: employment_status,
+      type,
+      // designationId: designation_id,
+      // departmentId: department_id,
+      organizationId: organization_id,
+      jobTitleId: job_title_id,
+      jobLevelId: job_level_id,
+      effectiveDate: effective_date,
+      endOfEmploymentDate: end_of_employment_date,
+      taxMethod: tax_method,
+      active,
+    };
+
     try {
-      await Career.update(
-        {
-          employeeId: employee_id,
-          employmentStatus: employment_status,
-          type,
-          designationId: designation_id,
-          departmentId: department_id,
-          jobTitleId: job_title_id,
-          effectiveDate: effective_date,
-          endOfEmploymentDate: end_of_employment_date,
-          taxMethod: tax_method,
-        },
-        {
-          where: { id: Number(id) },
-        },
-      );
+      await Career.update(data, {
+        where: { id: Number(id) },
+      });
 
       const career = await Career.findByPk(Number(id));
 

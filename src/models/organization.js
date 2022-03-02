@@ -1,33 +1,29 @@
-/* eslint-disable strict */
-
-// 'use strict';
-
+'use strict';
 const { Model } = require('sequelize');
-
 module.exports = (sequelize, DataTypes) => {
-  class Department extends Model {
+  class Organization extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    // eslint-disable-next-line no-unused-vars
     static associate(models) {
       // define association here
-      // Department.hasMany(models.Career, {
-      //   as: 'careers',
-      // });
+      Organization.hasMany(models.Career, {
+        as: 'careers',
+      });
     }
   }
-  Department.init(
+  Organization.init(
     {
       name: DataTypes.STRING,
+      parent: DataTypes.INTEGER,
       active: DataTypes.BOOLEAN,
     },
     {
       sequelize,
-      modelName: 'Department',
+      modelName: 'Organization',
     },
   );
-  return Department;
+  return Organization;
 };
