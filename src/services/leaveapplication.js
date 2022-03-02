@@ -291,7 +291,8 @@ class LeaveApplicationService {
 
               await Leave.update(
                 {
-                  takenLeave: remainingLeave,
+                  takenLeave:
+                    activeLeave.takenLeave + splittedLeaveDates.length,
                 },
                 {
                   where: {
