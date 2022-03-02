@@ -18,6 +18,29 @@ URL (With Pagination)
 
     GET /api/employees/{id}/attendances?pagination=true&page=1&per_page=2&start_date=2022-02-01&end_date=2022-02-02
 
+### Get Active Leave (Sisa Cuti) [NEW!]
+
+Note: Sisa cuti = total leave - taken leave
+URL
+
+    GET /api/employees/{id}/active-leave
+
+Reponse Example:
+
+    {
+        "data": {
+            "id": 1,
+            "employeeId": 9,
+            "startDate": "2022-01-01",
+            "endDate": "2022-12-31",
+            "totalLeave": 12,
+            "takenLeave": 10,
+            "active": true,
+            "createdAt": "2022-03-02T20:04:12.000Z",
+            "updatedAt": "2022-03-02T20:13:34.000Z"
+        }
+    }
+
 ## Attendances
 
 ### Checkin / Clockin
