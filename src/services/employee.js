@@ -28,6 +28,8 @@ const {
   Career,
   SickApplication,
   SickApprovalFlow,
+  LeaveApplication,
+  LeaveApprovalFlow,
   PermissionApplication,
   PermissionApprovalFlow,
   Leave,
@@ -208,35 +210,6 @@ class EmployeeService {
     }
   }
 
-  static async getSickApplications(id, filter) {
-    try {
-      const sickApplications = await SickApplication.findAll({
-        include: [
-          {
-            model: SickApprovalFlow,
-            as: 'approvalFlows',
-            include: ['confirmer'],
-          },
-        ],
-        order: [[filter.orderBy, filter.orderIn]],
-        where: {
-          employeeId: id,
-          ...(filter.status && { approvalStatus: filter.status }),
-          ...(filter.startDate &&
-            filter.endDate && {
-              date: {
-                [Op.between]: [filter.startDate, filter.endDate],
-              },
-            }),
-        },
-      });
-
-      return { sickApplications };
-    } catch (error) {
-      throw error;
-    }
-  }
-
   static async getRangeAttendances(id, filter) {
     try {
       if (!filter.startDate || !filter.endDate) {
@@ -280,6 +253,35 @@ class EmployeeService {
       });
 
       return { attendances: rangeAttendances };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getSickApplications(id, filter) {
+    try {
+      const sickApplications = await SickApplication.findAll({
+        include: [
+          {
+            model: SickApprovalFlow,
+            as: 'approvalFlows',
+            include: ['confirmer'],
+          },
+        ],
+        order: [[filter.orderBy, filter.orderIn]],
+        where: {
+          employeeId: id,
+          ...(filter.status && { approvalStatus: filter.status }),
+          ...(filter.startDate &&
+            filter.endDate && {
+              date: {
+                [Op.between]: [filter.startDate, filter.endDate],
+              },
+            }),
+        },
+      });
+
+      return { sickApplications };
     } catch (error) {
       throw error;
     }
@@ -384,6 +386,73 @@ class EmployeeService {
 
       return {
         permissionApplications: rows,
+        page,
+        total: count,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getLeaveApplications(id, filter) {
+    try {
+      const leaveApplications = await LeaveApplication.findAll({
+        include: [
+          {
+            model: LeaveApprovalFlow,
+            as: 'approvalFlows',
+            include: ['confirmer'],
+          },
+        ],
+        order: [[filter.orderBy, filter.orderIn]],
+        where: {
+          employeeId: id,
+          ...(filter.status && { approvalStatus: filter.status }),
+          ...(filter.startDate &&
+            filter.endDate && {
+              date: {
+                [Op.between]: [filter.startDate, filter.endDate],
+              },
+            }),
+        },
+      });
+
+      return { leaveApplications };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getPaginatedLeaveApplications(id, page, perPage, filter) {
+    try {
+      const offset = (page - 1) * perPage;
+
+      const { rows, count } = await LeaveApplication.findAndCountAll({
+        include: [
+          {
+            model: LeaveApprovalFlow,
+            as: 'approvalFlows',
+            include: ['confirmer'],
+          },
+        ],
+        order: [[filter.orderBy, filter.orderIn]],
+        where: {
+          employeeId: id,
+          ...(filter.status && { approvalStatus: filter.status }),
+          ...(filter.startDate &&
+            filter.endDate && {
+              date: {
+                [Op.between]: [filter.startDate, filter.endDate],
+              },
+            }),
+        },
+        limit: Number(perPage),
+        offset: Number(offset),
+        // include: 'employee',
+      });
+
+      return {
+        leaveApplications: rows,
         page,
         total: count,
       };

@@ -371,6 +371,87 @@ module.exports = (app) => {
   });
 
   /**
+   * Get specific leave application data by employee id with or without pagination
+   */
+  route.get('/:id/leave-applications', async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const pagination = req.query.pagination || false;
+      const status = cleanQueryFilter(
+        req.query.status,
+        ['pending', 'approved', 'rejected'],
+        null,
+      );
+      const orderBy = cleanQueryFilter(req.query.order_by, ['date'], 'date');
+      const orderIn = cleanQueryFilter(
+        req.query.order_in,
+        ['desc', 'asc'],
+        'desc',
+      );
+      const startDate = cleanQueryFilter(req.query.start_date, [], null);
+      const endDate = cleanQueryFilter(req.query.end_date, [], null);
+
+      const filter = {
+        status,
+        orderBy,
+        orderIn,
+        startDate: startDate && new Date(startDate),
+        endDate: endDate && dayjs.utc(endDate).add(1, 'day').format(),
+      };
+
+      // return res.send(filter);
+
+      // * Get data without pagination
+      if (!pagination || pagination !== 'true') {
+        const { leaveApplications } =
+          await employeeServiceInstance.getLeaveApplications(
+            Number(id),
+            filter,
+          );
+
+        return res.json({
+          data: leaveApplications,
+        });
+      }
+
+      // * Get data with pagination
+
+      const { page } = req.query;
+      if (!page || Number.isNaN(page)) {
+        return res.status(400).send({
+          message: '"page" query is required & must be a number',
+        });
+      }
+
+      const perPage = req.query.per_page;
+      if (!perPage || Number.isNaN(perPage)) {
+        return res.status(400).send({
+          message: '"perPage" query is required & must be a number',
+        });
+      }
+
+      // eslint-disable-next-line operator-linebreak
+      const { leaveApplications, total } =
+        await employeeServiceInstance.getPaginatedLeaveApplications(
+          Number(id),
+          Number(page),
+          Number(perPage),
+          filter,
+        );
+
+      return res.json({
+        data: leaveApplications,
+        page: Number(page),
+        total,
+      });
+    } catch (error) {
+      next(error);
+    }
+
+    return null;
+  });
+
+  /**
    * Get specific permission application data by employee id with or without pagination
    */
   route.get('/:id/permission-applications', async (req, res, next) => {
