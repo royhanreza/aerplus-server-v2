@@ -144,7 +144,7 @@ class InspectionService {
             {
               model: Career,
               as: 'careers',
-              include: ['designation', 'department', 'jobTitle'],
+              include: ['organization', 'jobTitle', 'jobLevel'],
             },
           ],
         });

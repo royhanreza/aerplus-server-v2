@@ -5,7 +5,7 @@ const { Op } = require('sequelize');
 const models = require('../models');
 const { getDatesRange } = require('../helpers');
 
-const { DailySalary, Employee, Attendance } = models;
+const { DailySalary, Employee, Attendance, DailyPayslipTemplate } = models;
 
 class DailySalaryService {
   static async getAll() {
@@ -117,8 +117,8 @@ class DailySalaryService {
 
       // ! DEVELOPMENT VALUE
       // TODO: GET VALUE FROM DATABASE
-      const wagesPerDay = 75000;
-      const overtimePayPerHour = 10000;
+      // const wagesPerDay = 75000;
+      // const overtimePayPerHour = 10000;
 
       // !-------------------
 
@@ -134,6 +134,12 @@ class DailySalaryService {
             },
             required: false,
           },
+          {
+            model: DailyPayslipTemplate,
+            as: 'dailyPayslipTemplate',
+            include: ['incomes', 'deductions'],
+            required: true,
+          },
         ],
         order: [
           // We start the order array with the model we want to sort
@@ -141,12 +147,12 @@ class DailySalaryService {
         ],
       });
 
-      //   return employees;
+      // return employees;
 
       const datesRange = getDatesRange(startDate, endDate);
 
       const dailySalaries = employees.map((employee) => {
-        const { attendances } = employee;
+        const { attendances, dailyPayslipTemplate } = employee;
         // let presentAttendances = [];
         if (Array.isArray(attendances)) {
           //   presentAttendances = attendances.filter(
@@ -156,10 +162,10 @@ class DailySalaryService {
           let summaryDeductionAmount = 0;
           let summaryAmount = 0;
           const payments = datesRange.map((date) => {
-            let dailyPay = 0;
-            let overtimePay = 0;
-            let incomes_amount = 0;
-            const deductions_amount = 0;
+            // let dailyPay = 0;
+            // let overtimePay = 0;
+            let incomesAmount = 0;
+            let deductionsAmount = 0;
 
             const [newAttendance] = attendances.filter(
               (attendance) => attendance.date === date,
@@ -170,53 +176,132 @@ class DailySalaryService {
                 date,
                 detail: {
                   incomes: [],
-                  incomes_amount,
+                  incomesAmount,
                   deductions: [],
-                  deductions_amount,
-                  amount: dailyPay,
+                  deductionsAmount,
+                  amount: 0,
                   status: null,
                   attendance: null,
                 },
               };
             }
 
-            if (newAttendance.status === 'hadir_hari_kerja') {
-              dailyPay = wagesPerDay;
-              if (newAttendance.overtime && newAttendance.overtime > 0) {
+            const isLongShift = newAttendance.isLongShift || false;
+
+            // 1. Loop incomes
+            const dayStatus = newAttendance.status;
+            const incomes = dailyPayslipTemplate.incomes.map((income) => {
+              let name = income.name || 'Pendapatan (tidak ada nama)';
+              let value =
+                income.DailyPayslipTemplateDailySalaryIncomes.amount || 0;
+
+              if (income.type === 'long_shift') {
+                if (!isLongShift) {
+                  value = 0;
+                }
+              }
+
+              if (income.type === 'lembur') {
                 const overtimeMinutes = newAttendance.overtime;
                 const overtimeHours = Math.floor(overtimeMinutes / 60);
-                overtimePay = overtimePayPerHour * overtimeHours;
+                name = `${name} (${overtimeHours} Jam)`;
+                value *= overtimeHours;
               }
-            }
 
-            const incomes = [
-              {
-                name: 'Uang Harian',
-                value: dailyPay,
+              if (income.presentOnly) {
+                if (dayStatus === 'hadir_hari_kerja') {
+                  return {
+                    name,
+                    value,
+                  };
+                }
+                return {
+                  name,
+                  value: 0,
+                };
+              }
+
+              return {
+                name,
+                value,
+              };
+            });
+            // if (newAttendance.status === 'hadir_hari_kerja') {
+            //   dailyPay = wagesPerDay;
+            //   if (newAttendance.overtime && newAttendance.overtime > 0) {
+            //     const overtimeMinutes = newAttendance.overtime;
+            //     const overtimeHours = Math.floor(overtimeMinutes / 60);
+            //     overtimePay = overtimePayPerHour * overtimeHours;
+            //   }
+            // }
+
+            // const incomes = [
+            //   {
+            //     name: 'Uang Harian',
+            //     value: dailyPay,
+            //   },
+            //   {
+            //     name: 'Upah Lembur',
+            //     value: overtimePay,
+            //   },
+            // ];
+
+            // incomesAmount = dailyPay + overtimePay;
+            incomesAmount = incomes
+              .map((income) => income.value)
+              .reduce((acc, cur) => Number(acc) + Number(cur), 0);
+
+            const deductions = dailyPayslipTemplate.deductions.map(
+              (deduction) => {
+                let name = deduction.name || 'Potongan (tidak ada nama)';
+                let value =
+                  deduction.DailyPayslipTemplateDailySalaryDeductions.amount ||
+                  0;
+
+                if (deduction.type === 'keterlambatan') {
+                  const timeLateMinutes = newAttendance.timeLate;
+                  const timeLateHours = Math.ceil(timeLateMinutes / 60);
+                  name = `${name} (${timeLateMinutes} Menit)`;
+                  value *= timeLateHours;
+                }
+
+                if (deduction.presentOnly) {
+                  if (dayStatus === 'hadir_hari_kerja') {
+                    return {
+                      name,
+                      value,
+                    };
+                  }
+                  return {
+                    name,
+                    value: 0,
+                  };
+                }
+
+                return {
+                  name,
+                  value,
+                };
               },
-              {
-                name: 'Upah Lembur',
-                value: overtimePay,
-              },
-            ];
+            );
 
-            incomes_amount = dailyPay + overtimePay;
+            deductionsAmount = deductions
+              .map((deduction) => deduction.value)
+              .reduce((acc, cur) => Number(acc) + Number(cur), 0);
 
-            const deductions = [];
-
-            const payAmount = incomes_amount - deductions_amount;
+            const payAmount = incomesAmount - deductionsAmount;
 
             // Summary Amount Assignment
-            summaryIncomesAmount += incomes_amount;
-            summaryDeductionAmount += deductions_amount;
+            summaryIncomesAmount += incomesAmount;
+            summaryDeductionAmount += deductionsAmount;
             summaryAmount += payAmount;
 
             return {
               date,
               detail: {
                 incomes,
-                incomes_amount,
-                deductions_amount,
+                incomesAmount,
+                deductionsAmount,
                 deductions,
                 amount: payAmount,
                 status: newAttendance.status,
@@ -227,13 +312,14 @@ class DailySalaryService {
 
           const newEmployee = employee.get();
           delete newEmployee.attendances;
+          delete newEmployee.dailyPayslipTemplate;
 
           return {
             employee: newEmployee,
             payments,
             summary: {
-              incomes_amount: summaryIncomesAmount,
-              deductions_amount: summaryDeductionAmount,
+              incomesAmount: summaryIncomesAmount,
+              deductionsAmount: summaryDeductionAmount,
               amount: summaryAmount,
             },
           };

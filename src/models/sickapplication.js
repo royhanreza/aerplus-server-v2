@@ -18,6 +18,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'attendances',
         onDelete: 'cascade',
       });
+      SickApplication.belongsTo(models.Employee, {
+        foreignKey: 'employeeId',
+        as: 'employee',
+        onDelete: 'cascade',
+      });
     }
   }
   SickApplication.init(

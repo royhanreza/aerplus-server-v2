@@ -11,12 +11,54 @@ const sequelize = require('../loaders/sequelize');
 const { SickApplication, SickApprovalFlow, Attendance } = models;
 
 class SickApplicationService {
-  static async getAll() {
+  static async getAll(filter) {
     try {
+      // const sickApplications = await SickApplication.findAll({
+      //   include: ['approvalFlows'],
+      // });
+      // return { sickApplications };
       const sickApplications = await SickApplication.findAll({
-        include: ['approvalFlows'],
+        order: [[filter.orderBy, filter.orderIn]],
+        where: {
+          ...(filter.startDate &&
+            filter.endDate && {
+              date: {
+                [Op.between]: [filter.startDate, filter.endDate],
+              },
+            }),
+        },
+        include: ['employee', 'approvalFlows'],
       });
       return { sickApplications };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getPaginated(page, perPage, filter) {
+    try {
+      const offset = (page - 1) * perPage;
+
+      const { rows, count } = await SickApplication.findAndCountAll({
+        order: [[filter.orderBy, filter.orderIn]],
+        where: {
+          // employeeId: id,
+          ...(filter.startDate &&
+            filter.endDate && {
+              date: {
+                [Op.between]: [filter.startDate, filter.endDate],
+              },
+            }),
+        },
+        limit: Number(perPage),
+        offset: Number(offset),
+        include: ['employee', 'approvalFlows'],
+      });
+
+      return {
+        sickApplications: rows,
+        total: count,
+      };
     } catch (error) {
       throw error;
     }
@@ -108,7 +150,8 @@ class SickApplicationService {
 
   static async update(sickApplicationInputDTO, id, req) {
     // eslint-disable-next-line object-curly-newline
-    const { employee_id, date, sick_dates, note } = sickApplicationInputDTO;
+    const { employee_id, date, sick_dates, note, old_attachment } =
+      sickApplicationInputDTO;
 
     const splittedSickDates = sick_dates.split(',');
 
@@ -156,7 +199,14 @@ class SickApplicationService {
           date,
           sickDates: sick_dates,
           note,
-          attachment: attachment ? attachment.key : null,
+          attachment: attachment ? attachment.key : undefined,
+          // attachment: () => {
+          //   if (attachment) {
+          //     return attachment.key;
+          //   }
+
+          //   return undefined;
+          // },
         },
         {
           where: { id: Number(id) },

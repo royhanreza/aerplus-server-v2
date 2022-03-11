@@ -5,6 +5,7 @@ const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 const multer = require('multer');
 const SickApplicationService = require('../../services/sickapplication');
+const { cleanQueryFilter } = require('../../helpers');
 
 dayjs.extend(utc);
 
@@ -41,14 +42,72 @@ module.exports = (app) => {
    */
   route.get('/', async (req, res, next) => {
     try {
-      const { sickApplications } =
-        await SickApplicationServiceInstance.getAll();
+      // const { sickApplications } =
+      //   await SickApplicationServiceInstance.getAll();
+
+      // return res.json({
+      //   message: 'OK',
+      //   data: sickApplications,
+      // });
+      // * Get data with pagination
+
+      const { id } = req.params;
+      const pagination = req.query.pagination || false;
+      const orderBy = cleanQueryFilter(req.query.order_by, ['date'], 'date');
+      const orderIn = cleanQueryFilter(
+        req.query.order_in,
+        ['desc', 'asc'],
+        'asc',
+      );
+      const startDate = cleanQueryFilter(req.query.start_date, [], null);
+      const endDate = cleanQueryFilter(req.query.end_date, [], null);
+
+      const filter = {
+        orderBy,
+        orderIn,
+        startDate: startDate && new Date(startDate),
+        endDate: endDate && dayjs.utc(endDate).add(1, 'day').format(),
+      };
+
+      // return res.send(filter);
+
+      // * Get data without pagination
+      if (!pagination || pagination !== 'true') {
+        const { sickApplications } =
+          await SickApplicationServiceInstance.getAll(filter);
+
+        return res.json({
+          data: sickApplications,
+        });
+        // * Get data with pagination
+      }
+
+      const { page } = req.query;
+      if (!page || Number.isNaN(page)) {
+        return res.status(400).send({
+          message: '"page" query is required & must be a number',
+        });
+      }
+
+      const perPage = req.query.per_page;
+      if (!perPage || Number.isNaN(perPage)) {
+        return res.status(400).send({
+          message: '"perPage" query is required & must be a number',
+        });
+      }
+
+      // eslint-disable-next-line operator-linebreak
+      const { sickApplications, total } =
+        await SickApplicationServiceInstance.getPaginated(
+          Number(page),
+          Number(perPage),
+          filter,
+        );
 
       return res.json({
-        message: 'OK',
         data: sickApplications,
+        total,
       });
-      // * Get data with pagination
     } catch (error) {
       next(error);
     }
@@ -91,6 +150,7 @@ module.exports = (app) => {
           sick_dates: Joi.string().required(),
           status: Joi.string().allow('', null),
           note: Joi.string().allow('', null),
+          attachment: Joi.string().allow('', null),
         }),
     }),
     // TODO: FIX MULTER AND JOI CONFIGURATION
@@ -131,6 +191,8 @@ module.exports = (app) => {
           date: Joi.string().required(),
           sick_dates: Joi.string().required(),
           note: Joi.string().allow('', null),
+          attachment: Joi.string().allow('', null),
+          old_attachment: Joi.string().allow('', null),
         }),
     }),
     // TODO: FIX MULTER AND JOI CONFIGURATION

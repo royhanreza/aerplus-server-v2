@@ -26,6 +26,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'confirmedBy',
         onDelete: 'cascade',
       });
+      Employee.hasMany(models.SickApplication, {
+        as: 'sickApplications',
+        foreignKey: 'employeeId',
+        onDelete: 'cascade',
+      });
       Employee.hasMany(models.PermissionApprovalFlow, {
         as: 'permissionApprovalFlows',
         foreignKey: 'confirmedBy',
@@ -58,6 +63,10 @@ module.exports = (sequelize, DataTypes) => {
       Employee.belongsTo(models.Office, {
         foreignKey: 'officeId',
         as: 'office',
+      });
+      Employee.belongsTo(models.DailyPayslipTemplate, {
+        foreignKey: 'dailyPayslipTemplateId',
+        as: 'dailyPayslipTemplate',
       });
     }
   }

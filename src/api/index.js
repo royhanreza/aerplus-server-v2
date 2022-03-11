@@ -19,6 +19,9 @@ const eventCalendar = require('./routes/eventcalendar');
 const dailySalary = require('./routes/dailysalary');
 const outlet = require('./routes/outlet');
 const organizationalStructures = require('./routes/organizationalstructures');
+const dailysalaryincome = require('./routes/dailysalaryincome');
+const dailysalarydeduction = require('./routes/dailysalarydeduction');
+const dailypaysliptemplate = require('./routes/dailypaysliptemplate');
 
 module.exports = () => {
   const app = Router();
@@ -43,5 +46,8 @@ module.exports = () => {
   dailySalary(app);
   outlet(app);
   organizationalStructures(app);
+  dailysalaryincome(app);
+  dailysalarydeduction(app);
+  dailypaysliptemplate(app);
   return app;
 };

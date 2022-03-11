@@ -2,6 +2,7 @@
 /* eslint-disable operator-linebreak */
 /* eslint-disable no-useless-catch */
 const dayjs = require('dayjs');
+const customParseFormat = require('dayjs/plugin/customParseFormat');
 const { Op } = require('sequelize');
 const config = require('../config');
 const workingPatternHelper = require('../helpers/workingpattern');
@@ -9,6 +10,7 @@ const { getActiveCareer } = require('../helpers/career');
 const s3 = require('../loaders/awsS3');
 const models = require('../models');
 
+dayjs.extend(customParseFormat);
 const { Attendance, Employee, WorkingPattern, Career } = models;
 
 class AttendanceService {
@@ -232,6 +234,7 @@ class AttendanceService {
         clock_in_longitude,
         clock_in_office_latitude,
         clock_in_office_longitude,
+        working_pattern_id,
         note,
       } = attendanceInputDTO;
 
@@ -278,13 +281,17 @@ class AttendanceService {
       // ? Assign working pattern
       let activeWorkingPattern = null;
 
-      const { workingPatterns } = employee;
+      // const { workingPatterns } = employee;
 
-      if (Array.isArray(workingPatterns)) {
-        if (workingPatterns.length > 0) {
-          [activeWorkingPattern] = workingPatterns;
-        }
-      }
+      // if (Array.isArray(workingPatterns)) {
+      //   if (workingPatterns.length > 0) {
+      //     [activeWorkingPattern] = workingPatterns;
+      //   }
+      // }
+
+      activeWorkingPattern = await WorkingPattern.findByPk(working_pattern_id, {
+        include: ['items'],
+      });
 
       // ! Check If active working pattern exist
       if (!activeWorkingPattern) {
@@ -293,23 +300,30 @@ class AttendanceService {
 
       // Calculate working pattern
 
-      const WPEffectiveDate =
-        activeWorkingPattern.EmployeeWorkingPatterns.effectiveDate;
-      const WPDaysTo = activeWorkingPattern.EmployeeWorkingPatterns.daysTo;
-      const WPNumberOfDays = activeWorkingPattern.numberOfDays;
+      // const WPEffectiveDate =
+      //   activeWorkingPattern.EmployeeWorkingPatterns.effectiveDate;
+      // const WPDaysTo = activeWorkingPattern.EmployeeWorkingPatterns.daysTo;
+      // const WPNumberOfDays = activeWorkingPattern.numberOfDays;
+      // TODO ----------------------------
 
-      const dayOrder = workingPatternHelper.determineWorkingPatternOrder(
-        WPEffectiveDate,
-        WPDaysTo,
-        date,
-        WPNumberOfDays,
-      );
+      // const dayOrder = workingPatternHelper.determineWorkingPatternOrder(
+      //   WPEffectiveDate,
+      //   WPDaysTo,
+      //   date,
+      //   WPNumberOfDays,
+      // );
+      const todayOrder = dayjs(date, 'YYYY-MM-DD').day();
+      const dayOrder = todayOrder < 1 ? 7 : todayOrder;
 
       // return dayOrder;
 
       if (dayOrder === null) {
         throw new Error('Failed to read employee working pattern');
       }
+
+      // const workingPatternDay = activeWorkingPattern.items.filter(
+      //   (item) => Number(item.order) === Number(dayOrder),
+      // )[0];
 
       const workingPatternDay = activeWorkingPattern.items.filter(
         (item) => Number(item.order) === Number(dayOrder),
@@ -351,10 +365,12 @@ class AttendanceService {
         clockInLongitude: clock_in_longitude,
         clockInOfficeLatitude: clock_in_office_latitude,
         clockInOfficeLongitude: clock_in_office_longitude,
+        clockInWorkingPatternTime: workingPatternDay.clockIn,
         status: 'hadir_hari_kerja',
         timeLate: timeLate > 0 ? timeLate : 0,
         clockInNote: note,
         clockInAttachment: attachment ? attachment.key : null,
+        workingPatternId: working_pattern_id,
       });
       return attendance;
     } catch (e) {
@@ -376,6 +392,8 @@ class AttendanceService {
         clock_out_longitude,
         clock_out_office_latitude,
         clock_out_office_longitude,
+        is_long_shift,
+        long_shift_working_pattern_id,
         note,
       } = attendanceInputDTO;
 
@@ -435,13 +453,33 @@ class AttendanceService {
       // ? Assign working pattern
       let activeWorkingPattern = null;
 
-      const { workingPatterns } = employee;
+      // const { workingPatterns } = employee;
 
-      if (Array.isArray(workingPatterns)) {
-        if (workingPatterns.length > 0) {
-          [activeWorkingPattern] = workingPatterns;
+      // if (Array.isArray(workingPatterns)) {
+      //   if (workingPatterns.length > 0) {
+      //     [activeWorkingPattern] = workingPatterns;
+      //   }
+      // }
+      let { workingPatternId } = todayAttendance;
+      if (!workingPatternId) {
+        throw new Error('Working pattern id is null');
+      }
+
+      const isLongShift = is_long_shift;
+
+      if (isLongShift) {
+        workingPatternId = long_shift_working_pattern_id;
+
+        if (!long_shift_working_pattern_id) {
+          throw new Error(
+            'Checkout is long shift, "long_shift_working_pattern_id" is required',
+          );
         }
       }
+
+      activeWorkingPattern = await WorkingPattern.findByPk(workingPatternId, {
+        include: ['items'],
+      });
 
       // ! Check If active working pattern exist
       if (!activeWorkingPattern) {
@@ -450,18 +488,20 @@ class AttendanceService {
 
       // Calculate working pattern
 
-      const WPEffectiveDate =
-        activeWorkingPattern.EmployeeWorkingPatterns.effectiveDate;
-      const WPDaysTo = activeWorkingPattern.EmployeeWorkingPatterns.daysTo;
-      const WPNumberOfDays = activeWorkingPattern.numberOfDays;
+      // const WPEffectiveDate =
+      //   activeWorkingPattern.EmployeeWorkingPatterns.effectiveDate;
+      // const WPDaysTo = activeWorkingPattern.EmployeeWorkingPatterns.daysTo;
+      // const WPNumberOfDays = activeWorkingPattern.numberOfDays;
 
-      const dayOrder = workingPatternHelper.determineWorkingPatternOrder(
-        WPEffectiveDate,
-        WPDaysTo,
-        date,
-        WPNumberOfDays,
-      );
+      // const dayOrder = workingPatternHelper.determineWorkingPatternOrder(
+      //   WPEffectiveDate,
+      //   WPDaysTo,
+      //   date,
+      //   WPNumberOfDays,
+      // );
 
+      const todayOrder = dayjs(date, 'YYYY-MM-DD').day();
+      const dayOrder = todayOrder < 1 ? 7 : todayOrder;
       // return dayOrder;
 
       if (dayOrder === null) {
@@ -514,10 +554,21 @@ class AttendanceService {
           clockOutLongitude: clock_out_longitude,
           clockOutOfficeLatitude: clock_out_office_latitude,
           clockOutOfficeLongitude: clock_out_office_longitude,
+          clockOutWorkingPatternTime: workingPatternDay.clockOut,
           earlyLeaving,
           overtime,
           clockOutNote: note,
           clockOutAttachment: attachment ? attachment.key : null,
+          isLongShift,
+          longShiftWorkingPatternId: isLongShift
+            ? long_shift_working_pattern_id
+            : null,
+          longShiftWorkingPatternClockInTime: isLongShift
+            ? workingPatternDay.clockIn
+            : null,
+          longShiftWorkingPatternClockOutTime: isLongShift
+            ? workingPatternDay.clockOut
+            : null,
         },
         {
           where: {

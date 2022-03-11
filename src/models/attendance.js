@@ -57,6 +57,9 @@ module.exports = (sequelize, DataTypes) => {
       clockInOfficeLongitude: {
         type: DataTypes.STRING('30'),
       },
+      clockInWorkingPatternTime: {
+        type: DataTypes.TIME,
+      },
       clockInAttachment: {
         type: DataTypes.STRING,
       },
@@ -88,6 +91,9 @@ module.exports = (sequelize, DataTypes) => {
       clockOutOfficeLongitude: {
         type: DataTypes.STRING('30'),
       },
+      clockOutWorkingPatternTime: {
+        type: DataTypes.TIME,
+      },
       clockOutAttachment: {
         type: DataTypes.STRING,
       },
@@ -110,6 +116,18 @@ module.exports = (sequelize, DataTypes) => {
         // allowNull: false,
         type: DataTypes.STRING('20'),
       },
+      isLongShift: {
+        type: DataTypes.BOOLEAN,
+      },
+      longShiftWorkingPatternId: {
+        type: DataTypes.INTEGER,
+      },
+      longShiftWorkingPatternClockInTime: {
+        type: DataTypes.TIME,
+      },
+      longShiftWorkingPatternClockOutTime: {
+        type: DataTypes.TIME,
+      },
       // note: {
       //   type: DataTypes.STRING,
       // },
@@ -122,6 +140,9 @@ module.exports = (sequelize, DataTypes) => {
       // officeLongitude: {
       //   type: DataTypes.STRING('30'),
       // },
+      workingPatternId: {
+        type: DataTypes.INTEGER,
+      },
       sickApplicationId: {
         type: DataTypes.INTEGER,
       },
